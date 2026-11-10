@@ -40,6 +40,9 @@ def main() -> None:
 
     for path in sorted(DASHBOARDS.glob("*.json")):
         dashboard = json.loads(path.read_text())
+        # Shared (public) dashboards fetch data per panel id, so every panel needs a stable one.
+        for number, panel in enumerate(dashboard["panels"], start=1):
+            panel.setdefault("id", number)
         status, out = api("POST", "/api/dashboards/db",
                           {"dashboard": dashboard, "folderUid": FOLDER["uid"], "overwrite": True,
                            "message": "grafana-sync.py"})

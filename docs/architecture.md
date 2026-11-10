@@ -98,3 +98,29 @@ with a read-only role.
 
 The home is on a 230 V IT grid. The meter reports current on L1 and L3 only, so L2 is always
 empty, and that is expected. All three phase voltages are reported.
+
+## Dashboards
+
+Defined in [`grafana/dashboards/`](../grafana/dashboards/) and uploaded with
+`scripts/grafana-sync.py` (the repo wins over edits in the UI). All in the Grafana folder "Strøm".
+
+| Dashboard | For | Shared without login |
+|---|---|---|
+| **Strøm – hverdag** (`power-hverdag`) | The household, phone first. A traffic light for "can we use power now", what's left this hour, the capacity step per day with the step limits as red lines, price now, tomorrow's coldest hour, this month so far, and habits | Yes |
+| **Strøm – over tid** (`power-over-tid`) | Long-term statistics: this year against last, monthly use per year, what the power cost, Norgespris against spot price, capacity step per month, use against outdoor temperature, base load, spot price history. Policy events are annotations | Yes |
+| **Strøm – teknisk** (`power-live`) | Phases, voltage, fuse, raw live numbers | No |
+
+The two family dashboards are Grafana "shared dashboards": anyone with the link can view them,
+and they reveal the household's consumption pattern. Keep the links private; turn sharing off
+under Dashboard → Share → Share externally to revoke a link.
+
+Shared dashboards don't support per-panel time overrides, and instant queries are evaluated at
+the end of the dashboard's time range, so that range must end at `now`.
+
+## Price model
+
+The household has **Norgespris** (fixed 50 øre/kWh incl. VAT, settled on the grid bill). The
+spot price therefore doesn't change what the household pays; the grid energy charge (15 øre
+cheaper 22–06 and at weekends) and the capacity step do. `power.monthly_price_schemes` compares
+Norgespris with spot price minus strømstøtte for every month since 2021 (a "what if" before
+October 2025). The strømstøtte rules are in `power.support_scheme`.

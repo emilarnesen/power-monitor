@@ -10,6 +10,7 @@ Checked 2026-11-10. Prices and limits change; check before relying on them.
 | **Fly.io** | Runs the collector | Pay as you go | About 20 NOK/month (shared-cpu-1x, 256 MB) | Volume snapshots daily, kept 5 days by default (1–60 configurable) |
 | **Grafana Cloud** | Prometheus, dashboards, alerts | Free | 0 | 14 days metric retention, 10k active series |
 | **Supabase** | Postgres for long-term data | Free | 0 | 500 MB. **No backups on Free**, hence our own nightly dump. Pauses after a week without activity |
+| **Open-Meteo** | Outdoor temperature, hourly, history and 2-day forecast | No account | 0 | Free for non-commercial use |
 | **GitHub** | Code, docs, deploy to Fly via Actions | Free | 0 | |
 
 ## Endpoints

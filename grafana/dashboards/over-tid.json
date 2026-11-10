@@ -79,12 +79,12 @@
       "type": "timeseries", "title": "Effekttrinn per måned", "gridPos": {"x": 0, "y": 35, "w": 24, "h": 9},
       "description": "Snittet av de tre verste timene (på tre ulike dager) for hver måned. Røde streker er grensene der nettleia blir dyrere. Ser dere at mange måneder ligger tett under en strek, er det mye å spare på å spre forbruket litt bedre.",
       "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
-      "targets": [{"refId": "A", "format": "time_series", "rawQuery": true, "editorMode": "code", "rawSql": "with m as (\n  select month, top3_avg_kwh from power.monthly_capacity_cost\n  where $__timeFilter(month at time zone 'Europe/Oslo')\n), steps as (\n  select min_kwh, monthly_nok from power.capacity_step\n  where valid_from = (select max(valid_from) from power.capacity_step) and min_kwh > 4 and min_kwh < 16\n)\nselect month at time zone 'Europe/Oslo' as time, 'Snitt av de 3 verste timene' as metric, top3_avg_kwh as value from m\nunion all\nselect month at time zone 'Europe/Oslo', 'Grense ' || round(min_kwh)::int || ' kWh → ' || round(monthly_nok)::int || ' kr/mnd', round(min_kwh)\nfrom m cross join steps\norder by 1"}],
+      "targets": [{"refId": "A", "format": "time_series", "rawQuery": true, "editorMode": "code", "rawSql": "with m as (\n  select month, top3_avg_kwh from power.monthly_capacity_cost\n  where $__timeFilter(month at time zone 'Europe/Oslo')\n), steps as (\n  select min_kwh, monthly_nok from power.capacity_step\n  where valid_from = (select max(valid_from) from power.capacity_step) and min_kwh > 4 and min_kwh < 16\n)\nselect month at time zone 'Europe/Oslo' as time, 'Snitt av de 3 verste timene' as metric, top3_avg_kwh as value from m\nunion all\nselect month at time zone 'Europe/Oslo', 'Over ' || round(min_kwh)::int || ' kWh: ' || round(monthly_nok)::int || ' kr/mnd', round(min_kwh)\nfrom m cross join steps\norder by 1"}],
       "fieldConfig": {"defaults": {"unit": "kwatth", "decimals": 1, "min": 0, "softMax": 12,
           "custom": {"drawStyle": "bars", "fillOpacity": 85, "lineWidth": 1}},
         "overrides": [
           {"matcher": {"id": "byName", "options": "Snitt av de 3 verste timene"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "dark-blue"}}]},
-          {"matcher": {"id": "byRegexp", "options": "^Grense.*"}, "properties": [
+          {"matcher": {"id": "byRegexp", "options": "^Over .*"}, "properties": [
             {"id": "custom.drawStyle", "value": "line"}, {"id": "custom.lineWidth", "value": 2}, {"id": "custom.fillOpacity", "value": 0},
             {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]}
         ]},

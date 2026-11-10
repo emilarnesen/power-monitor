@@ -2,139 +2,717 @@
   "uid": "power-hverdag",
   "title": "Strøm – hverdag",
   "description": "Det dere trenger i hverdagen: er det greit å bruke strøm nå, og hvor nær er vi neste effekttrinn?",
-  "tags": ["power-monitor"],
+  "tags": [
+    "power-monitor"
+  ],
   "timezone": "Europe/Oslo",
   "refresh": "1m",
-  "time": {"from": "now/M", "to": "now/M"},
+  "time": {
+    "from": "now/M",
+    "to": "now"
+  },
   "schemaVersion": 41,
-  "templating": {"list": []},
+  "templating": {
+    "list": []
+  },
   "panels": [
     {
-      "type": "text", "title": "", "gridPos": {"x": 0, "y": 0, "w": 24, "h": 3},
-      "options": {"mode": "markdown", "content": "### Strømmen hjemme\nDet viktigste er **trafikklyset** under. Er det grønt, kan dere bruke strøm som vanlig. Er det gult eller rødt, bør dere vente litt med de store tingene: **billading, vaskemaskin, tørketrommel og oppvaskmaskin**."}
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "### Strømmen hjemme\nDet viktigste er **trafikklyset** under. Er det grønt, kan dere bruke strøm som vanlig. Er det gult eller rødt, bør dere vente litt med de store tingene: **billading, vaskemaskin, tørketrommel og oppvaskmaskin**."
+      }
     },
     {
-      "type": "stat", "title": "Hva bør vi gjøre nå?", "gridPos": {"x": 0, "y": 3, "w": 14, "h": 6},
+      "type": "stat",
+      "title": "Hva bør vi gjøre nå?",
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 14,
+        "h": 6
+      },
       "description": "Viser om strømbruken denne timen er på vei til å gjøre nettleia dyrere for hele måneden. Grønt: alt i orden. Gult: ikke start flere store ting denne timen. Oransje: vent med vask og lading til neste hele time. Rødt: skru av noe stort nå, for eksempel billading eller tørketrommel.",
-      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
-      "targets": [{"refId": "A", "expr": "power_monitor_hour_headroom_kwh", "instant": true}],
-      "fieldConfig": {"defaults": {
-        "color": {"mode": "thresholds"},
-        "thresholds": {"mode": "absolute", "steps": [
-          {"color": "red", "value": null}, {"color": "orange", "value": 0}, {"color": "yellow", "value": 1}, {"color": "green", "value": 3}]},
-        "mappings": [
-          {"type": "range", "options": {"from": 3, "to": 1000, "result": {"text": "🟢 Alt i orden – bruk strøm som vanlig", "color": "green"}}},
-          {"type": "range", "options": {"from": 1, "to": 3, "result": {"text": "🟡 Litt forsiktig – ikke start flere store ting denne timen", "color": "yellow"}}},
-          {"type": "range", "options": {"from": 0, "to": 1, "result": {"text": "🟠 Nær grensen – vent med vask og lading til neste time", "color": "orange"}}},
-          {"type": "range", "options": {"from": -1000, "to": 0, "result": {"text": "🔴 Over grensen – skru av billading eller tørketrommel nå", "color": "red"}}},
-          {"type": "special", "options": {"match": "null", "result": {"text": "🟢 Alt i orden – bruk strøm som vanlig", "color": "green"}}}
-        ]}},
-      "options": {"colorMode": "background", "graphMode": "none", "textMode": "value", "justifyMode": "center", "reduceOptions": {"calcs": ["lastNotNull"]}}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "power_monitor_hour_headroom_kwh",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "green",
+                "value": 3
+              }
+            ]
+          },
+          "mappings": [
+            {
+              "type": "range",
+              "options": {
+                "from": 3,
+                "to": 1000,
+                "result": {
+                  "text": "🟢 Alt i orden – bruk strøm som vanlig",
+                  "color": "green"
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": 1,
+                "to": 3,
+                "result": {
+                  "text": "🟡 Litt forsiktig – ikke start flere store ting denne timen",
+                  "color": "yellow"
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": 0,
+                "to": 1,
+                "result": {
+                  "text": "🟠 Nær grensen – vent med vask og lading til neste time",
+                  "color": "orange"
+                }
+              }
+            },
+            {
+              "type": "range",
+              "options": {
+                "from": -1000,
+                "to": 0,
+                "result": {
+                  "text": "🔴 Over grensen – skru av billading eller tørketrommel nå",
+                  "color": "red"
+                }
+              }
+            },
+            {
+              "type": "special",
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "🟢 Alt i orden – bruk strøm som vanlig",
+                  "color": "green"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
     },
     {
-      "type": "stat", "title": "Igjen denne timen", "gridPos": {"x": 14, "y": 3, "w": 10, "h": 6},
+      "type": "stat",
+      "title": "Igjen denne timen",
+      "gridPos": {
+        "x": 14,
+        "y": 3,
+        "w": 10,
+        "h": 6
+      },
       "description": "Hvor mye mer strøm dere kan bruke før klokka slår hel time, uten at nettleia blir dyrere for måneden. «Billading» viser hvor mange minutter det tilsvarer med elbilen (11 kW). Ved ny hel time begynner telleren på nytt.",
-      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
       "targets": [
-        {"refId": "A", "expr": "clamp_min(power_monitor_hour_headroom_kwh, 0)", "legendFormat": "Kan bruke", "instant": true},
-        {"refId": "B", "expr": "clamp_min(power_monitor_hour_headroom_kwh, 0) / 11 * 60", "legendFormat": "= billading", "instant": true},
-        {"refId": "C", "expr": "vector((3600 - time() % 3600) / 60)", "legendFormat": "Ny time om", "instant": true}
+        {
+          "refId": "A",
+          "expr": "clamp_min(power_monitor_hour_headroom_kwh, 0)",
+          "legendFormat": "Kan bruke",
+          "instant": true
+        },
+        {
+          "refId": "B",
+          "expr": "clamp_min(power_monitor_hour_headroom_kwh, 0) / 11 * 60",
+          "legendFormat": "= billading",
+          "instant": true
+        },
+        {
+          "refId": "C",
+          "expr": "vector((3600 - time() % 3600) / 60)",
+          "legendFormat": "Ny time om",
+          "instant": true
+        }
       ],
-      "fieldConfig": {"defaults": {"decimals": 0, "color": {"mode": "fixed", "fixedColor": "text"}},
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
         "overrides": [
-          {"matcher": {"id": "byFrameRefID", "options": "A"}, "properties": [{"id": "unit", "value": "kwatth"}, {"id": "decimals", "value": 1}]},
-          {"matcher": {"id": "byFrameRefID", "options": "B"}, "properties": [{"id": "unit", "value": "suffix: min"}]},
-          {"matcher": {"id": "byFrameRefID", "options": "C"}, "properties": [{"id": "unit", "value": "suffix: min"}]}
-        ]},
-      "options": {"colorMode": "none", "graphMode": "none", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"]}}
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "kwatth"
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix: min"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix: min"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
     },
     {
-      "type": "text", "title": "", "gridPos": {"x": 0, "y": 9, "w": 24, "h": 5},
-      "options": {"mode": "markdown", "content": "### Effekttrinn: hvor nær er vi grensen?\nNettleia har et fast beløp hver måned som avhenger av **de tre timene med høyest forbruk, på tre ulike dager**. Hver søyle er dagens verste time. De **mørke søylene** er de tre som teller nå, og den **stiplede linja** er snittet av dem. Går snittet over en **rød strek**, blir nettleia dyrere for hele måneden.\n\n**Hvis snittet nærmer seg en rød strek:** spre de store tingene utover dagen. Lad bilen etter kl. 22, og ikke kjør vaskemaskin, tørketrommel og oppvaskmaskin mens bilen lader. En ny dag teller bare hvis den blir verre enn den svakeste av de tre."}
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 24,
+        "h": 5
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "### Effekttrinn: hvor nær er vi grensen?\nNettleia har et fast beløp hver måned som avhenger av **de tre timene med høyest forbruk, på tre ulike dager**. Hver søyle er dagens verste time. De **mørke søylene** er de tre som teller nå, og den **stiplede linja** er snittet av dem. Går snittet over en **rød strek**, blir nettleia dyrere for hele måneden.\n\n**Hvis snittet nærmer seg en rød strek:** spre de store tingene utover dagen. Lad bilen etter kl. 22, og ikke kjør vaskemaskin, tørketrommel og oppvaskmaskin mens bilen lader. En ny dag teller bare hvis den blir verre enn den svakeste av de tre."
+      }
     },
     {
-      "type": "timeseries", "title": "Effekttrinn denne måneden – dagens verste time", "gridPos": {"x": 0, "y": 14, "w": 24, "h": 11},
+      "type": "timeseries",
+      "title": "Effekttrinn denne måneden – dagens verste time",
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 24,
+        "h": 11
+      },
       "description": "Søyle = høyeste forbruk i én time den dagen (kWh). Mørke søyler = de tre dagene som teller. Stiplet linje = snittet av de tre. Røde streker = grensene der nettleia blir dyrere, med månedsprisen.",
-      "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
-      "targets": [{"refId": "A", "format": "time_series", "rawQuery": true, "editorMode": "code", "rawSql": "with d as (\n  select (ts at time zone 'Europe/Oslo')::date as day, max(kwh) as peak\n  from power.consumption_hourly\n  where kwh is not null\n    and ts >= date_trunc('month', now() at time zone 'Europe/Oslo') at time zone 'Europe/Oslo'\n  group by 1\n), r as (\n  select day, peak, row_number() over (order by peak desc) as rk from d\n), days as (\n  select generate_series(date_trunc('month', now() at time zone 'Europe/Oslo'),\n                         date_trunc('month', now() at time zone 'Europe/Oslo') + interval '1 month - 1 day',\n                         interval '1 day')::date as day\n), steps as (\n  select min_kwh, monthly_nok from power.capacity_step\n  where valid_from = (select max(valid_from) from power.capacity_step) and min_kwh > 4 and min_kwh < 16\n)\nselect day::timestamp at time zone 'Europe/Oslo' as time, 'Teller (3 verste dager)' as metric, peak as value from r where rk <= 3\nunion all\nselect day::timestamp at time zone 'Europe/Oslo', 'Andre dager', peak from r where rk > 3\nunion all\nselect days.day::timestamp at time zone 'Europe/Oslo', 'Snitt av de 3 verste', (select avg(peak) from r where rk <= 3) from days\nunion all\nselect days.day::timestamp at time zone 'Europe/Oslo',\n       'Grense ' || round(min_kwh)::int || ' kWh → ' || round(monthly_nok)::int || ' kr/mnd', round(min_kwh)\nfrom days cross join steps\norder by 1"}],
-      "fieldConfig": {"defaults": {"unit": "kwatth", "decimals": 1, "min": 0, "softMax": 12,
-          "custom": {"drawStyle": "bars", "fillOpacity": 85, "lineWidth": 1, "barAlignment": 0, "stacking": {"mode": "none"}, "spanNulls": false}},
-        "overrides": [
-          {"matcher": {"id": "byName", "options": "Teller (3 verste dager)"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "dark-blue"}}]},
-          {"matcher": {"id": "byName", "options": "Andre dager"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "light-blue"}}]},
-          {"matcher": {"id": "byName", "options": "Snitt av de 3 verste"}, "properties": [
-            {"id": "custom.drawStyle", "value": "line"}, {"id": "custom.lineWidth", "value": 2}, {"id": "custom.fillOpacity", "value": 0},
-            {"id": "custom.lineStyle", "value": {"fill": "dash", "dash": [8, 6]}}, {"id": "color", "value": {"mode": "fixed", "fixedColor": "text"}}]},
-          {"matcher": {"id": "byRegexp", "options": "^Grense.*"}, "properties": [
-            {"id": "custom.drawStyle", "value": "line"}, {"id": "custom.lineWidth", "value": 2}, {"id": "custom.fillOpacity", "value": 0},
-            {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]}
-        ]},
-      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
-    },
-    {
-      "type": "timeseries", "title": "Denne timen – brukt så langt og grensen", "gridPos": {"x": 0, "y": 25, "w": 24, "h": 8},
-      "description": "Den blå linja stiger gjennom timen og starter på null ved hver hele time. Den røde stiplede linja er grensen for denne timen: kommer den blå over, blir nettleia dyrere for måneden. Den grå prikkede linja viser hvor timen ender hvis dere fortsetter som nå.",
-      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
-      "timeFrom": "6h",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "power-postgres"
+      },
       "targets": [
-        {"refId": "A", "expr": "power_monitor_energy_hour_kwh", "legendFormat": "Brukt denne timen"},
-        {"refId": "B", "expr": "power_monitor_hour_projected_kwh", "legendFormat": "Anslag ved timeslutt"},
-        {"refId": "C", "expr": "power_monitor_hour_limit_kwh", "legendFormat": "Grense (dyrere over)"}
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "with d as (\n  select (ts at time zone 'Europe/Oslo')::date as day, max(kwh) as peak\n  from power.consumption_hourly\n  where kwh is not null\n    and ts >= date_trunc('month', now() at time zone 'Europe/Oslo') at time zone 'Europe/Oslo'\n  group by 1\n), r as (\n  select day, peak, row_number() over (order by peak desc) as rk from d\n), days as (\n  select generate_series(date_trunc('month', now() at time zone 'Europe/Oslo'),\n                         date_trunc('month', now() at time zone 'Europe/Oslo') + interval '1 month - 1 day',\n                         interval '1 day')::date as day\n), steps as (\n  select min_kwh, monthly_nok from power.capacity_step\n  where valid_from = (select max(valid_from) from power.capacity_step) and min_kwh > 4 and min_kwh < 16\n)\nselect day::timestamp at time zone 'Europe/Oslo' as time, 'Teller (3 verste dager)' as metric, peak as value from r where rk <= 3\nunion all\nselect day::timestamp at time zone 'Europe/Oslo', 'Andre dager', peak from r where rk > 3\nunion all\nselect days.day::timestamp at time zone 'Europe/Oslo', 'Snitt av de 3 verste', (select avg(peak) from r where rk <= 3) from days\nunion all\nselect days.day::timestamp at time zone 'Europe/Oslo',\n       'Over ' || round(min_kwh)::int || ' kWh: ' || round(monthly_nok)::int || ' kr/mnd', round(min_kwh)\nfrom days cross join steps\norder by 1"
+        }
       ],
-      "fieldConfig": {"defaults": {"unit": "kwatth", "decimals": 1, "min": 0, "custom": {"lineWidth": 2, "fillOpacity": 10, "spanNulls": 60000}},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatth",
+          "decimals": 1,
+          "min": 0,
+          "softMax": 12,
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 85,
+            "lineWidth": 1,
+            "barAlignment": 0,
+            "stacking": {
+              "mode": "none"
+            },
+            "spanNulls": false
+          }
+        },
         "overrides": [
-          {"matcher": {"id": "byName", "options": "Brukt denne timen"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}]},
-          {"matcher": {"id": "byName", "options": "Anslag ved timeslutt"}, "properties": [
-            {"id": "color", "value": {"mode": "fixed", "fixedColor": "gray"}}, {"id": "custom.fillOpacity", "value": 0},
-            {"id": "custom.lineWidth", "value": 1}, {"id": "custom.lineStyle", "value": {"fill": "dot", "dash": [2, 6]}}]},
-          {"matcher": {"id": "byName", "options": "Grense (dyrere over)"}, "properties": [
-            {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}, {"id": "custom.fillOpacity", "value": 0},
-            {"id": "custom.lineStyle", "value": {"fill": "dash", "dash": [8, 6]}}]}
-        ]},
-      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Teller (3 verste dager)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "dark-blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Andre dager"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "light-blue"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Snitt av de 3 verste"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "custom.lineStyle",
+                "value": {
+                  "fill": "dash",
+                  "dash": [
+                    8,
+                    6
+                  ]
+                }
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^Over .*"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "line"
+              },
+              {
+                "id": "custom.lineWidth",
+                "value": 2
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "red"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
     },
     {
-      "type": "stat", "title": "Pris nå (kr/kWh)", "gridPos": {"x": 0, "y": 33, "w": 6, "h": 5},
+      "type": "bargauge",
+      "title": "Denne timen – hvor nær grensen?",
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 24,
+        "h": 6
+      },
+      "description": "100 % er grensen for denne timen. Over den blir nettleia dyrere for hele måneden. «Brukt så langt» stiger gjennom timen og starter på null ved hver hele time. «Anslag ved timeslutt» viser hvor timen ender hvis dere fortsetter som nå. Er anslaget gult eller rødt: vent med noe stort (billading, tørketrommel) til neste hele time.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * power_monitor_energy_hour_kwh / power_monitor_hour_limit_kwh",
+          "legendFormat": "Brukt så langt",
+          "instant": true
+        },
+        {
+          "refId": "B",
+          "expr": "100 * power_monitor_hour_projected_kwh / power_monitor_hour_limit_kwh",
+          "legendFormat": "Anslag ved timeslutt",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 0,
+          "min": 0,
+          "max": 110,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 70
+              },
+              {
+                "color": "orange",
+                "value": 90
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "displayMode": "lcd",
+        "orientation": "horizontal",
+        "showUnfilled": true,
+        "namePlacement": "top",
+        "valueMode": "color",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Pris nå (kr/kWh)",
+      "gridPos": {
+        "x": 0,
+        "y": 33,
+        "w": 6,
+        "h": 5
+      },
       "description": "Norgespris (fast 50 øre) pluss nettleia. Nettleia er 15 øre billigere om natta (kl. 22–06) og hele helgen. Ellers er prisen lik hele tiden.",
-      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
-      "targets": [{"refId": "A", "expr": "0.5 + power_monitor_grid_energy_nok", "instant": true}],
-      "fieldConfig": {"defaults": {"decimals": 2, "unit": "suffix: kr",
-        "color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 0.9}]},
-        "mappings": []}},
-      "options": {"colorMode": "value", "graphMode": "none", "reduceOptions": {"calcs": ["lastNotNull"]}}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "0.5 + power_monitor_grid_energy_nok",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 2,
+          "unit": "suffix: kr",
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.9
+              }
+            ]
+          },
+          "mappings": []
+        }
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
     },
     {
-      "type": "stat", "title": "Kaldest i morgen", "gridPos": {"x": 6, "y": 33, "w": 6, "h": 5},
+      "type": "stat",
+      "title": "Kaldest i morgen",
+      "gridPos": {
+        "x": 6,
+        "y": 33,
+        "w": 6,
+        "h": 5
+      },
       "description": "Laveste temperatur ute i morgen (værvarsel). Jo kaldere, jo mer jobber varmepumpa, varmekablene og panelovnene, og jo mindre rom er det for billading og vask samtidig. Under −10 °C: lad bilen om natta og spre vasken utover dagen.",
-      "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
-      "targets": [{"refId": "A", "format": "table", "rawQuery": true, "editorMode": "code", "rawSql": "select min(temperature_c) as \"Kaldest i morgen\"\nfrom power.weather_hourly\nwhere ts >= (date_trunc('day', now() at time zone 'Europe/Oslo') + interval '1 day') at time zone 'Europe/Oslo'\n  and ts <  (date_trunc('day', now() at time zone 'Europe/Oslo') + interval '2 day') at time zone 'Europe/Oslo'"}],
-      "fieldConfig": {"defaults": {"unit": "celsius", "decimals": 0,
-        "color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "purple", "value": null}, {"color": "blue", "value": -10}, {"color": "text", "value": 0}]}}},
-      "options": {"colorMode": "value", "graphMode": "none", "reduceOptions": {"calcs": ["lastNotNull"]}}
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "power-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "select min(temperature_c) as \"Kaldest i morgen\"\nfrom power.weather_hourly\nwhere ts >= (date_trunc('day', now() at time zone 'Europe/Oslo') + interval '1 day') at time zone 'Europe/Oslo'\n  and ts <  (date_trunc('day', now() at time zone 'Europe/Oslo') + interval '2 day') at time zone 'Europe/Oslo'"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              },
+              {
+                "color": "blue",
+                "value": -10
+              },
+              {
+                "color": "text",
+                "value": 0
+              }
+            ]
+          }
+        }
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
     },
     {
-      "type": "stat", "title": "Brukt i dag", "gridPos": {"x": 12, "y": 33, "w": 6, "h": 5},
+      "type": "stat",
+      "title": "Brukt i dag",
+      "gridPos": {
+        "x": 12,
+        "y": 33,
+        "w": 6,
+        "h": 5
+      },
       "description": "Strøm brukt siden midnatt.",
-      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
-      "targets": [{"refId": "A", "expr": "power_monitor_energy_today_kwh", "instant": true}],
-      "fieldConfig": {"defaults": {"unit": "kwatth", "decimals": 0, "color": {"mode": "fixed", "fixedColor": "text"}}},
-      "options": {"colorMode": "value", "graphMode": "none", "reduceOptions": {"calcs": ["lastNotNull"]}}
+      "datasource": {
+        "type": "prometheus",
+        "uid": "grafanacloud-prom"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "power_monitor_energy_today_kwh",
+          "instant": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "kwatth",
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        }
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
     },
     {
-      "type": "stat", "title": "Hittil denne måneden", "gridPos": {"x": 18, "y": 33, "w": 6, "h": 5},
+      "type": "stat",
+      "title": "Hittil denne måneden",
+      "gridPos": {
+        "x": 18,
+        "y": 33,
+        "w": 6,
+        "h": 5
+      },
       "description": "Omtrentlig regning så langt: Norgespris (50 øre/kWh) + nettleia (per kWh) + effekttrinnet. Uten Tibbers og Elvias faste månedsbeløp.",
-      "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
-      "targets": [{"refId": "A", "format": "table", "rawQuery": true, "editorMode": "code", "rawSql": "select p.kwh as \"Forbruk\",\n       p.norgespris_nok + p.grid_energy_cost_nok + coalesce(c.monthly_nok, 0) as \"Kostnad ca.\"\nfrom power.monthly_price_schemes p\nleft join power.monthly_capacity_cost c using (month)\nwhere p.month = date_trunc('month', now() at time zone 'Europe/Oslo')"}],
-      "fieldConfig": {"defaults": {"decimals": 0, "color": {"mode": "fixed", "fixedColor": "text"}},
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "power-postgres"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "select p.kwh as \"Forbruk\",\n       p.norgespris_nok + p.grid_energy_cost_nok + coalesce(c.monthly_nok, 0) as \"Kostnad ca.\"\nfrom power.monthly_price_schemes p\nleft join power.monthly_capacity_cost c using (month)\nwhere p.month = date_trunc('month', now() at time zone 'Europe/Oslo')"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
         "overrides": [
-          {"matcher": {"id": "byName", "options": "Forbruk"}, "properties": [{"id": "unit", "value": "kwatth"}]},
-          {"matcher": {"id": "byName", "options": "Kostnad ca."}, "properties": [{"id": "unit", "value": "suffix: kr"}]}
-        ]},
-      "options": {"colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"]}}
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Forbruk"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "kwatth"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Kostnad ca."
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "suffix: kr"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
     },
     {
-      "type": "text", "title": "", "gridPos": {"x": 0, "y": 38, "w": 24, "h": 7},
-      "options": {"mode": "markdown", "content": "### Gode vaner\n- **Spre de store tingene utover.** Billading, tørketrommel, vaskemaskin, oppvaskmaskin, komfyr og varmtvann samtidig er det som lager de dyre timene.\n- **Lad bilen etter kl. 22.** Nettleia er billigst, og huset bruker lite. Lad gjerne i helgene også, for da er nettleia billig hele dagen.\n- **En dårlig time er ikke krise.** Det er snittet av de *tre* verste dagene som teller. Pass på at det ikke blir tre.\n- **Kalde dager er risikodager.** Når varmen går for fullt, er det mindre plass til resten.\n- **Strømprisen er fast (Norgespris).** Det lønner seg ikke å jakte billige timer på strømprisen, bare på nettleia (natt og helg) og effekttrinnet."}
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 38,
+        "w": 24,
+        "h": 7
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "### Gode vaner\n- **Spre de store tingene utover.** Billading, tørketrommel, vaskemaskin, oppvaskmaskin, komfyr og varmtvann samtidig er det som lager de dyre timene.\n- **Lad bilen etter kl. 22.** Nettleia er billigst, og huset bruker lite. Lad gjerne i helgene også, for da er nettleia billig hele dagen.\n- **En dårlig time er ikke krise.** Det er snittet av de *tre* verste dagene som teller. Pass på at det ikke blir tre.\n- **Kalde dager er risikodager.** Når varmen går for fullt, er det mindre plass til resten.\n- **Strømprisen er fast (Norgespris).** Det lønner seg ikke å jakte billige timer på strømprisen, bare på nettleia (natt og helg) og effekttrinnet."
+      }
     }
   ]
 }
