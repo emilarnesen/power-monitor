@@ -43,6 +43,11 @@ def main() -> None:
         # Shared (public) dashboards fetch data per panel id, so every panel needs a stable one.
         for number, panel in enumerate(dashboard["panels"], start=1):
             panel.setdefault("id", number)
+            # A shared dashboard also asks for data for text panels and shows "Failed to extract
+            # queries from panel" when there is none. A constant query keeps it quiet.
+            if panel["type"] == "text" and not panel.get("targets"):
+                panel["datasource"] = {"type": "prometheus", "uid": "grafanacloud-prom"}
+                panel["targets"] = [{"refId": "A", "expr": "vector(1)", "instant": True}]
         status, out = api("POST", "/api/dashboards/db",
                           {"dashboard": dashboard, "folderUid": FOLDER["uid"], "overwrite": True,
                            "message": "grafana-sync.py"})
