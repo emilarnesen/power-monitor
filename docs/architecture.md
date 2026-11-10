@@ -22,7 +22,10 @@
    - Alerts and live dashboards use Prometheus (PromQL).
    - History and year-over-year dashboards use Postgres (SQL).
    - Policy changes (strømstøtte, Norgespris) are shown as annotations.
-7. **Backup.** The collector runs `pg_dump` nightly to a Fly volume, which Fly snapshots daily.
+7. **Backup.** At 03:00 the collector exports every table as gzipped CSV to the Fly volume
+   (`/data/backups/<date>/`, 14 days kept), and Fly snapshots the volume daily (30 days kept).
+   CSV via `COPY` needs no `pg_dump` matching the server version. To restore, run the
+   migrations, then `COPY power.<table> FROM` each file.
 
 ## What goes where
 
@@ -51,7 +54,28 @@ Tibber doesn't document how long it keeps history, so the backfill copies everyt
 
 ## Metrics (Prometheus)
 
-Defined with the collector code. All carry no personal labels.
+Pushed with every Pulse reading (every 10 s) from [`collector.py`](../power_monitor/collector.py).
+They carry no personal labels.
+
+| Metric | Meaning |
+|---|---|
+| `power_monitor_power_w` | Power now |
+| `power_monitor_power_production_w` | Power exported (solar), 0 without production |
+| `power_monitor_power_factor` | Power factor |
+| `power_monitor_voltage_v{phase}` | Voltage per phase |
+| `power_monitor_current_a{phase}` | Current per phase (L2 missing on an IT grid) |
+| `power_monitor_energy_today_kwh`, `_cost_today_nok` | So far today (Tibber's figures) |
+| `power_monitor_energy_hour_kwh` | So far this hour |
+| `power_monitor_hour_projected_kwh` | Where this hour ends if power stays as now |
+| `power_monitor_capacity_avg_kwh` | Average of this month's top 3 daily peaks (ended hours) |
+| `power_monitor_capacity_projected_avg_kwh` | The same, if this hour ends as projected |
+| `power_monitor_capacity_step_max_kwh` | Upper bound of the current capacity step |
+| `power_monitor_capacity_step_nok`, `_capacity_projected_step_nok` | Monthly price of the current / projected step |
+| `power_monitor_spot_price_nok` | Price this quarter hour from Tibber (incl. VAT and markup) |
+| `power_monitor_grid_energy_nok` | Grid energy charge this hour |
+| `power_monitor_price_total_nok` | Spot + grid energy charge |
+| `power_monitor_spot_price_next3h_max_nok` | Highest quarter-hour price in the next 3 hours |
+| `power_monitor_main_fuse_amps` | Main fuse, for alert thresholds |
 
 ## Tables (Postgres)
 

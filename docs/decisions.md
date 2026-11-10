@@ -42,7 +42,9 @@ Grafana Cloud Pro (13 months' retention, about 200 NOK/month) was rejected on co
 | Timescale, ClickHouse, Fly Postgres | 300–1,600 NOK/month |
 | Turso, Cloudflare D1, MotherDuck | No usable Grafana Cloud datasource |
 
-Supabase Free has no backups, so the collector dumps the database nightly to a Fly volume.
+Supabase Free has no backups, so the collector exports the database nightly as CSV to a Fly
+volume. CSV via `COPY` was chosen over `pg_dump` because it needs no client binary matching
+the server's Postgres version.
 Prices and hourly consumption can be fetched again from the sources. The 1-minute Pulse
 aggregates can't, and the dump covers them.
 

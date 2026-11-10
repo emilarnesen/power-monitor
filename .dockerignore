@@ -1,0 +1,10 @@
+.env
+.env.*
+.git
+.venv
+.github
+docs
+tests
+scripts
+supabase
+**/__pycache__

@@ -1,0 +1,23 @@
+# The collector. No public ports: it only makes outgoing connections.
+# Personal values and keys are Fly secrets, not here (see docs/configuration.md).
+app = "emilarnesen-power-monitor"
+primary_region = "arn"  # Stockholm, next to Grafana Cloud's eu-north
+
+[build]
+
+[env]
+  PRICE_AREA = "NO1"
+  GRAFANA_INFLUX_URL = "https://influx-prod-39-prod-eu-north-0.grafana.net/api/v1/push/influx/write"
+
+# Nightly CSV backups of the database. Fly snapshots the volume daily.
+[mounts]
+  source = "power_data"
+  destination = "/data"
+  snapshot_retention = 30
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+
+[[restart]]
+  policy = "always"

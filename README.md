@@ -40,6 +40,7 @@ flowchart LR
 | [Access](docs/access.md) | Accounts, tokens, scopes and where each one is kept |
 | [Configuration](docs/configuration.md) | Environment variables; personal values are never committed |
 | [Decisions](docs/decisions.md) | Choices made and why |
+| [Runbook](docs/runbook.md) | Checking, deploying, backfilling, restoring |
 
 ## Public repo
 
