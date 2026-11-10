@@ -1,0 +1,129 @@
+{
+  "uid": "power-live",
+  "title": "Strøm – nå",
+  "tags": ["power-monitor"],
+  "timezone": "Europe/Oslo",
+  "refresh": "10s",
+  "time": {"from": "now-6h", "to": "now"},
+  "schemaVersion": 41,
+  "templating": {"list": []},
+  "panels": [
+    {
+      "type": "stat", "title": "Effekt nå", "gridPos": {"x": 0, "y": 0, "w": 4, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
+      "targets": [{"refId": "A", "expr": "power_monitor_power_w / 1000"}],
+      "fieldConfig": {"defaults": {"unit": "kwatt", "decimals": 2, "color": {"mode": "thresholds"},
+        "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 6}, {"color": "red", "value": 10}]}}},
+      "options": {"graphMode": "area", "reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "type": "stat", "title": "Denne timen → anslag", "gridPos": {"x": 4, "y": 0, "w": 5, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
+      "targets": [
+        {"refId": "A", "expr": "power_monitor_energy_hour_kwh", "legendFormat": "Hittil"},
+        {"refId": "B", "expr": "power_monitor_hour_projected_kwh", "legendFormat": "Anslag"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "kwatth", "decimals": 2, "color": {"mode": "thresholds"},
+        "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 8}, {"color": "red", "value": 10}]}}},
+      "options": {"graphMode": "none", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "type": "stat", "title": "Effekttrinn", "description": "Snitt av månedens tre høyeste timer (på ulike dager), og hva trinnet koster per måned. «Anslag» tar med timen som pågår.",
+      "gridPos": {"x": 9, "y": 0, "w": 6, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
+      "targets": [
+        {"refId": "A", "expr": "power_monitor_capacity_avg_kwh", "legendFormat": "Snitt topp 3"},
+        {"refId": "B", "expr": "power_monitor_capacity_step_max_kwh", "legendFormat": "Neste trinn ved"},
+        {"refId": "C", "expr": "power_monitor_capacity_projected_step_nok", "legendFormat": "kr/mnd (anslag)"}
+      ],
+      "fieldConfig": {"defaults": {"decimals": 2, "color": {"mode": "fixed", "fixedColor": "text"}},
+        "overrides": [
+          {"matcher": {"id": "byFrameRefID", "options": "A"}, "properties": [{"id": "unit", "value": "kwatth"}]},
+          {"matcher": {"id": "byFrameRefID", "options": "B"}, "properties": [{"id": "unit", "value": "kwatth"}, {"id": "decimals", "value": 0}]},
+          {"matcher": {"id": "byFrameRefID", "options": "C"}, "properties": [{"id": "unit", "value": "currencyNOK"}, {"id": "decimals", "value": 0}]}
+        ]},
+      "options": {"graphMode": "none", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "type": "stat", "title": "Pris nå (kr/kWh)", "description": "Strøm fra Tibber (inkl. mva. og påslag) + nettleiens energiledd. Uten strømstøtte/Norgespris.",
+      "gridPos": {"x": 15, "y": 0, "w": 5, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
+      "targets": [
+        {"refId": "A", "expr": "power_monitor_price_total_nok", "legendFormat": "Totalt"},
+        {"refId": "B", "expr": "power_monitor_spot_price_nok", "legendFormat": "Strøm"},
+        {"refId": "C", "expr": "power_monitor_grid_energy_nok", "legendFormat": "Nettleie"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "none", "decimals": 2, "color": {"mode": "thresholds"},
+        "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1.5}, {"color": "red", "value": 3}]}}},
+      "options": {"graphMode": "none", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "type": "stat", "title": "I dag", "gridPos": {"x": 20, "y": 0, "w": 4, "h": 5},
+      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
+      "targets": [
+        {"refId": "A", "expr": "power_monitor_cost_today_nok", "legendFormat": "Strømkostnad"},
+        {"refId": "B", "expr": "power_monitor_energy_today_kwh", "legendFormat": "Forbruk"}
+      ],
+      "fieldConfig": {"defaults": {"decimals": 0, "color": {"mode": "fixed", "fixedColor": "text"}},
+        "overrides": [
+          {"matcher": {"id": "byFrameRefID", "options": "A"}, "properties": [{"id": "unit", "value": "currencyNOK"}]},
+          {"matcher": {"id": "byFrameRefID", "options": "B"}, "properties": [{"id": "unit", "value": "kwatth"}]}
+        ]},
+      "options": {"graphMode": "none", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "type": "timeseries", "title": "Effekt", "gridPos": {"x": 0, "y": 5, "w": 16, "h": 9},
+      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
+      "targets": [{"refId": "A", "expr": "power_monitor_power_w / 1000", "legendFormat": "Effekt"}],
+      "fieldConfig": {"defaults": {"unit": "kwatt", "decimals": 1, "custom": {"fillOpacity": 15, "lineWidth": 1, "spanNulls": 60000}}},
+      "options": {"legend": {"showLegend": false}, "tooltip": {"mode": "single"}}
+    },
+    {
+      "type": "timeseries", "title": "Timen: hittil og anslag mot neste effekttrinn", "gridPos": {"x": 16, "y": 5, "w": 8, "h": 9},
+      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
+      "targets": [
+        {"refId": "A", "expr": "power_monitor_energy_hour_kwh", "legendFormat": "Hittil"},
+        {"refId": "B", "expr": "power_monitor_hour_projected_kwh", "legendFormat": "Anslag"},
+        {"refId": "C", "expr": "power_monitor_capacity_step_max_kwh", "legendFormat": "Neste trinn"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "kwatth", "decimals": 2, "custom": {"lineWidth": 1, "spanNulls": 60000}},
+        "overrides": [{"matcher": {"id": "byName", "options": "Neste trinn"},
+          "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}, {"id": "custom.lineStyle", "value": {"fill": "dash", "dash": [6, 4]}}]}]},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "type": "timeseries", "title": "Strøm per fase", "description": "IT-nett: måleren måler bare L1 og L3.",
+      "gridPos": {"x": 0, "y": 14, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
+      "targets": [
+        {"refId": "A", "expr": "power_monitor_current_a", "legendFormat": "{{phase}}"},
+        {"refId": "B", "expr": "power_monitor_main_fuse_amps", "legendFormat": "Hovedsikring"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "amp", "decimals": 1, "min": 0, "custom": {"lineWidth": 1, "spanNulls": 60000}},
+        "overrides": [{"matcher": {"id": "byName", "options": "Hovedsikring"},
+          "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}, {"id": "custom.lineStyle", "value": {"fill": "dash", "dash": [6, 4]}}]}]},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "type": "timeseries", "title": "Spenning per fase", "description": "Krav til spenningskvalitet: 230 V ± 10 % (207–253 V).",
+      "gridPos": {"x": 12, "y": 14, "w": 12, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
+      "targets": [{"refId": "A", "expr": "power_monitor_voltage_v", "legendFormat": "{{phase}}"}],
+      "fieldConfig": {"defaults": {"unit": "volt", "decimals": 1, "custom": {"lineWidth": 1, "spanNulls": 60000,
+        "thresholdsStyle": {"mode": "dashed"}},
+        "thresholds": {"mode": "absolute", "steps": [{"color": "transparent", "value": null}, {"color": "red", "value": 207}]}}},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "type": "timeseries", "title": "Pris (kr/kWh)", "gridPos": {"x": 0, "y": 22, "w": 24, "h": 8},
+      "datasource": {"type": "prometheus", "uid": "grafanacloud-prom"},
+      "targets": [
+        {"refId": "A", "expr": "power_monitor_price_total_nok", "legendFormat": "Totalt"},
+        {"refId": "B", "expr": "power_monitor_spot_price_nok", "legendFormat": "Strøm"},
+        {"refId": "C", "expr": "power_monitor_grid_energy_nok", "legendFormat": "Nettleie"}
+      ],
+      "fieldConfig": {"defaults": {"unit": "none", "decimals": 2, "custom": {"lineWidth": 1, "lineInterpolation": "stepAfter", "spanNulls": 60000}}},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    }
+  ]
+}
