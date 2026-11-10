@@ -9,7 +9,7 @@ from datetime import date, datetime, time, timedelta
 from time import sleep
 from zoneinfo import ZoneInfo
 
-from . import db
+from . import db, weather
 from .config import Config
 from .elvia import Elvia
 from .tibber import Tibber
@@ -20,6 +20,8 @@ ELVIA_FIRST_MONTH = date(2022, 7, 1)
 # The day-ahead market moved to 15-minute prices here. Earlier quarter-hour prices from Tibber
 # are just the hourly price repeated, so they aren't stored.
 QUARTER_HOUR_FROM = datetime(2025, 10, 1, tzinfo=OSLO)
+# Weather from the year before the first consumption data, for comparisons.
+WEATHER_FIRST_YEAR = 2020
 
 
 def backfill_tibber(cfg: Config, conn) -> None:
@@ -84,14 +86,26 @@ def backfill_elvia(cfg: Config, conn) -> None:
         sleep(20)
 
 
+def backfill_weather(cfg: Config, conn) -> None:
+    if cfg.latitude is None or cfg.longitude is None:
+        raise SystemExit("LATITUDE and LONGITUDE are needed for weather")
+    # The archive lags a few days; the collector fills recent hours from the forecast API.
+    for year in range(WEATHER_FIRST_YEAR, date.today().year + 1):
+        end = min(date(year, 12, 31), date.today() - timedelta(days=2))
+        rows = weather.history(cfg.latitude, cfg.longitude, date(year, 1, 1), end)
+        print(f"weather {year}: {db.upsert(conn, 'weather_hourly', rows)} hours", flush=True)
+
+
 def main() -> None:
     cfg = Config.from_env()
-    which = sys.argv[1:] or ["tibber", "elvia"]
+    which = sys.argv[1:] or ["tibber", "elvia", "weather"]
     with db.connect(cfg.database_url) as conn:
         if "tibber" in which:
             backfill_tibber(cfg, conn)
         if "elvia" in which:
             backfill_elvia(cfg, conn)
+        if "weather" in which:
+            backfill_weather(cfg, conn)
 
 
 if __name__ == "__main__":

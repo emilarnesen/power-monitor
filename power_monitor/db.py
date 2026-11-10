@@ -38,6 +38,10 @@ UPSERTS = {
             voltage_min_v = excluded.voltage_min_v, current_l1_max_a = excluded.current_l1_max_a,
             current_l2_max_a = excluded.current_l2_max_a, current_l3_max_a = excluded.current_l3_max_a,
             power_factor = excluded.power_factor""",
+    "weather_hourly": """
+        insert into power.weather_hourly (ts, temperature_c, forecast)
+        values (%(ts)s, %(temperature_c)s, %(forecast)s)
+        on conflict (ts) do update set temperature_c = excluded.temperature_c, forecast = excluded.forecast""",
     "capacity_step": """
         insert into power.capacity_step (valid_from, tariff_key, min_kwh, max_kwh, monthly_nok)
         values (%(valid_from)s, %(tariff_key)s, %(min_kwh)s, %(max_kwh)s, %(monthly_nok)s)
@@ -68,7 +72,8 @@ def daily_peaks_this_month(conn: psycopg.Connection) -> dict[str, float]:
     return {day: peak for day, peak in rows}
 
 
-BACKUP_TABLES = ["reading_1m", "consumption_hourly", "spot_price", "grid_tariff_hourly", "capacity_step", "event"]
+BACKUP_TABLES = ["reading_1m", "consumption_hourly", "spot_price", "grid_tariff_hourly", "capacity_step", "event",
+                 "weather_hourly"]
 
 
 def export_csv(conn: psycopg.Connection, table: str, out) -> None:

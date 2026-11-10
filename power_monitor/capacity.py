@@ -35,6 +35,25 @@ def step_for(steps: list[Step], kwh: float) -> Step | None:
     return None
 
 
+def hour_limit(daily_peaks: dict[str, float], day: str, step_max_kwh: float | None) -> float | None:
+    """Most kWh the current hour can end at without moving the month into a higher step.
+
+    None when there is no higher step, or when no realistic hour on this day would move it.
+    """
+    if step_max_kwh is None or top3_average(daily_peaks) >= step_max_kwh:
+        return None
+    low, high = 0.0, 100.0
+    if top3_average(with_hour(daily_peaks, day, high)) < step_max_kwh:
+        return None
+    for _ in range(40):  # bisection to well under 1 Wh
+        mid = (low + high) / 2
+        if top3_average(with_hour(daily_peaks, day, mid)) < step_max_kwh:
+            low = mid
+        else:
+            high = mid
+    return low
+
+
 def project_hour(energy_so_far_kwh: float, power_w: float, seconds_left: float) -> float:
     """Energy the current hour ends at if power stays where it is."""
     return energy_so_far_kwh + power_w / 1000 * seconds_left / 3600

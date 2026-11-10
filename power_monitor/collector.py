@@ -17,8 +17,8 @@ from zoneinfo import ZoneInfo
 
 import websockets
 
-from . import db
-from .capacity import Step, project_hour, step_for, top3_average, with_hour
+from . import db, weather
+from .capacity import Step, hour_limit, project_hour, step_for, top3_average, with_hour
 from .config import Config
 from .elvia import Elvia
 from .grafana import Grafana, line
@@ -158,6 +158,8 @@ class Collector:
         step_now = step_for(self.steps, now_avg)
         step_projected = step_for(self.steps, projected_avg)
 
+        limit = hour_limit(self.daily_peaks, _day(ts), step_now.max_kwh if step_now else None)
+
         quarter = ts.replace(minute=ts.minute - ts.minute % 15, second=0, microsecond=0)
         spot = self.prices.get(quarter)
         grid = self.grid.get(hour_start)
@@ -176,6 +178,9 @@ class Collector:
             "capacity_step_max_kwh": step_now.max_kwh if step_now else None,
             "capacity_step_nok": step_now.monthly_nok if step_now else None,
             "capacity_projected_step_nok": step_projected.monthly_nok if step_projected else None,
+            # Most this hour may end at before the month moves up a step, and what's left of it.
+            "hour_limit_kwh": limit,
+            "hour_headroom_kwh": limit - projected if limit is not None else None,
             "spot_price_nok": spot,
             "grid_energy_nok": grid,
             "price_total_nok": spot + grid if spot is not None and grid is not None else None,
@@ -232,6 +237,13 @@ class Collector:
              "max_kwh": l.get("valueMax"), "monthly_nok": l["monthlyTotal"]}
             for f in tariff["fixed_prices"] for l in f["priceLevels"]])
 
+    async def refresh_weather(self) -> None:
+        if self.cfg.latitude is None or self.cfg.longitude is None:
+            return
+        now_hour = datetime.now(ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:00")
+        rows = await asyncio.to_thread(weather.recent_and_forecast, self.cfg.latitude, self.cfg.longitude, now_hour)
+        await self.write("weather_hourly", rows)
+
     async def backup(self) -> None:
         """Nightly CSV export of every table to the Fly volume, which Fly snapshots daily."""
         while True:
@@ -258,7 +270,7 @@ class Collector:
 
     async def run(self) -> None:
         # Prices, tariff and this month's peaks first, so the first readings have context.
-        for job in (self.refresh_prices, self.refresh_tariff, self.refresh_consumption):
+        for job in (self.refresh_prices, self.refresh_tariff, self.refresh_consumption, self.refresh_weather):
             try:
                 await job()
             except Exception as e:
@@ -268,6 +280,7 @@ class Collector:
             self.every(15 * 60, self.refresh_prices),
             self.every(60 * 60, self.refresh_consumption),
             self.every(6 * 60 * 60, self.refresh_tariff),
+            self.every(60 * 60, self.refresh_weather),
         ]
         if BACKUP_DIR.parent.exists():
             jobs.append(self.backup())

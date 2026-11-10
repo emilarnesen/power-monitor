@@ -26,6 +26,8 @@ class Config:
     grid_voltage: int
     price_area: str
     database_url: str
+    latitude: float | None   # for weather; rounded to about 1 km
+    longitude: float | None
     entsoe_token: str | None
     grafana_influx_url: str | None
     grafana_metrics_user: str | None
@@ -42,6 +44,8 @@ class Config:
             grid_voltage=int(os.environ.get("GRID_VOLTAGE", "230")),
             price_area=os.environ.get("PRICE_AREA", "NO1"),
             database_url=_required("DATABASE_URL"),
+            latitude=float(_optional("LATITUDE")) if _optional("LATITUDE") else None,
+            longitude=float(_optional("LONGITUDE")) if _optional("LONGITUDE") else None,
             entsoe_token=_optional("ENTSOE_TOKEN"),
             grafana_influx_url=_optional("GRAFANA_INFLUX_URL"),
             grafana_metrics_user=_optional("GRAFANA_METRICS_USER"),

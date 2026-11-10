@@ -1,0 +1,122 @@
+{
+  "uid": "power-over-tid",
+  "title": "Strøm – over tid",
+  "description": "Statistikk og trender: hvor mye strøm bruker vi, hva koster den, og hvordan endrer det seg fra år til år?",
+  "tags": ["power-monitor"],
+  "timezone": "Europe/Oslo",
+  "refresh": "",
+  "time": {"from": "now-6y", "to": "now"},
+  "schemaVersion": 41,
+  "templating": {"list": []},
+  "annotations": {"list": [
+    {"name": "Hendelser", "enable": true, "iconColor": "orange",
+     "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
+     "target": {"refId": "Anno", "format": "table", "rawQuery": true, "editorMode": "code",
+       "rawSql": "select ts as time, title || coalesce(': ' || description, '') as text, tags from power.event where $__timeFilter(ts)"}}
+  ]},
+  "panels": [
+    {
+      "type": "text", "title": "", "gridPos": {"x": 0, "y": 0, "w": 24, "h": 3},
+      "options": {"mode": "markdown", "content": "### Strømmen over tid\nHer er det lange perspektivet: forbruk og kostnad måned for måned siden 2021. **Oransje streker** i grafene markerer viktige endringer, som strømstøtte, ny nettleiemodell og Norgespris. Hold musa over (eller trykk på) dem for å se hva som skjedde."}
+    },
+    {
+      "type": "stat", "title": "I år mot i fjor (samme periode)", "gridPos": {"x": 0, "y": 3, "w": 24, "h": 5},
+      "description": "Forbruk fra 1. januar til i dag, sammenlignet med samme periode i fjor. Kald vinter gir høyere forbruk, så se på temperaturen også.",
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
+      "targets": [{"refId": "A", "format": "table", "rawQuery": true, "editorMode": "code", "rawSql": "with t as (\n  select date_trunc('year', now() at time zone 'Europe/Oslo') as this_start,\n         now() at time zone 'Europe/Oslo' as this_end\n)\nselect\n  (select sum(kwh) from power.hourly_priced, t where ts at time zone 'Europe/Oslo' >= this_start and ts at time zone 'Europe/Oslo' < this_end) as \"I år\",\n  (select sum(kwh) from power.hourly_priced, t where ts at time zone 'Europe/Oslo' >= this_start - interval '1 year' and ts at time zone 'Europe/Oslo' < this_end - interval '1 year') as \"I fjor\",\n  (select avg(temperature_c) from power.weather_hourly, t where ts at time zone 'Europe/Oslo' >= this_start and ts at time zone 'Europe/Oslo' < this_end and not forecast) as \"Snittemp. i år\",\n  (select avg(temperature_c) from power.weather_hourly, t where ts at time zone 'Europe/Oslo' >= this_start - interval '1 year' and ts at time zone 'Europe/Oslo' < this_end - interval '1 year') as \"Snittemp. i fjor\""}],
+      "fieldConfig": {"defaults": {"unit": "kwatth", "decimals": 0, "color": {"mode": "fixed", "fixedColor": "text"}},
+        "overrides": [{"matcher": {"id": "byRegexp", "options": "^Snittemp.*"}, "properties": [{"id": "unit", "value": "celsius"}, {"id": "decimals", "value": 1}]}]},
+      "options": {"colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "type": "barchart", "title": "Forbruk per måned – i år, i fjor og året før", "gridPos": {"x": 0, "y": 8, "w": 24, "h": 9},
+      "description": "Hver måned har tre søyler: i år, i fjor og året før. Vintermånedene er alltid høyest, fordi oppvarming er den største strømforbrukeren. Er en søyle i år mye høyere enn tidligere år, var det kaldere eller noe nytt som bruker strøm.",
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
+      "targets": [{"refId": "A", "format": "table", "rawQuery": true, "editorMode": "code", "rawSql": "with m as (\n  select extract(year from month)::int as y, extract(month from month)::int as mo, kwh\n  from power.monthly_price_schemes\n), y as (select extract(year from now() at time zone 'Europe/Oslo')::int as now_y)\nselect (array['jan','feb','mar','apr','mai','jun','jul','aug','sep','okt','nov','des'])[mo] as \"Måned\",\n       sum(kwh) filter (where m.y = now_y - 2) as \"Året før\",\n       sum(kwh) filter (where m.y = now_y - 1) as \"I fjor\",\n       sum(kwh) filter (where m.y = now_y) as \"I år\"\nfrom m, y group by mo order by mo"}],
+      "fieldConfig": {"defaults": {"unit": "kwatth", "decimals": 0, "min": 0, "custom": {"fillOpacity": 85}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "Året før"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "#C7D0D9"}}]},
+          {"matcher": {"id": "byName", "options": "I fjor"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "light-blue"}}]},
+          {"matcher": {"id": "byName", "options": "I år"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "dark-blue"}}]}
+        ]},
+      "options": {"xField": "Måned", "orientation": "vertical", "groupWidth": 0.75, "barWidth": 0.95, "showValue": "never", "stacking": "none",
+        "legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "type": "timeseries", "title": "Hva kostet strømmen? (per måned)", "gridPos": {"x": 0, "y": 17, "w": 24, "h": 9},
+      "description": "Regningen per måned delt i tre: selve strømmen (spotpris minus strømstøtte, og fra oktober 2025 Norgespris), nettleia per kWh, og effekttrinnet (fast beløp for de tre verste timene). Faste månedsbeløp til Tibber og Elvia er ikke med.",
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
+      "targets": [{"refId": "A", "format": "time_series", "rawQuery": true, "editorMode": "code", "rawSql": "select p.month at time zone 'Europe/Oslo' as time,\n       case when p.month >= '2025-10-01' then p.norgespris_nok else p.spot_net_nok end as \"Strøm\",\n       p.grid_energy_cost_nok as \"Nettleie per kWh\",\n       c.monthly_nok as \"Effekttrinn\"\nfrom power.monthly_price_schemes p\nleft join power.monthly_capacity_cost c using (month)\nwhere $__timeFilter(p.month at time zone 'Europe/Oslo')\norder by 1"}],
+      "fieldConfig": {"defaults": {"unit": "suffix: kr", "decimals": 0, "min": 0,
+          "custom": {"drawStyle": "bars", "fillOpacity": 85, "lineWidth": 1, "stacking": {"mode": "normal"}}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "Strøm"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}]},
+          {"matcher": {"id": "byName", "options": "Nettleie per kWh"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "purple"}}]},
+          {"matcher": {"id": "byName", "options": "Effekttrinn"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "orange"}}]}
+        ]},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom", "calcs": ["sum"]}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "type": "timeseries", "title": "Norgespris eller spotpris – hva lønner seg?", "gridPos": {"x": 0, "y": 26, "w": 16, "h": 9},
+      "description": "Hvor mye billigere (grønt) eller dyrere (rødt) strømmen hadde vært med Norgespris (50 øre/kWh) enn med spotpris og strømstøtte, måned for måned. Før oktober 2025 fantes ikke Norgespris, så de månedene er et «hva om». Norgespris for 2027 må bestilles på nytt fra 5. januar 2027 (bestiller du innen 14. januar, gjelder den fra 1. januar).",
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
+      "targets": [{"refId": "A", "format": "time_series", "rawQuery": true, "editorMode": "code", "rawSql": "select month at time zone 'Europe/Oslo' as time, spot_net_nok - norgespris_nok as \"Spart med Norgespris\"\nfrom power.monthly_price_schemes\nwhere $__timeFilter(month at time zone 'Europe/Oslo')\norder by 1"}],
+      "fieldConfig": {"defaults": {"unit": "suffix: kr", "decimals": 0,
+          "color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 0}]},
+          "custom": {"drawStyle": "bars", "fillOpacity": 85, "lineWidth": 1}}},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom", "calcs": ["sum"]}, "tooltip": {"mode": "single"}}
+    },
+    {
+      "type": "stat", "title": "Spart med Norgespris", "gridPos": {"x": 16, "y": 26, "w": 8, "h": 9},
+      "description": "Sum av hvor mye Norgespris har spart (eller kostet) sammenlignet med spotpris og strømstøtte, i år og siden Norgespris startet 1. oktober 2025.",
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
+      "targets": [{"refId": "A", "format": "table", "rawQuery": true, "editorMode": "code", "rawSql": "select\n  sum(spot_net_nok - norgespris_nok) filter (where month >= date_trunc('year', now() at time zone 'Europe/Oslo')) as \"I år\",\n  sum(spot_net_nok - norgespris_nok) filter (where month >= '2025-10-01') as \"Siden okt. 2025\"\nfrom power.monthly_price_schemes"}],
+      "fieldConfig": {"defaults": {"unit": "suffix: kr", "decimals": 0,
+        "color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 0}]}}},
+      "options": {"colorMode": "value", "graphMode": "none", "textMode": "value_and_name", "orientation": "horizontal", "reduceOptions": {"calcs": ["lastNotNull"]}}
+    },
+    {
+      "type": "timeseries", "title": "Effekttrinn per måned", "gridPos": {"x": 0, "y": 35, "w": 24, "h": 9},
+      "description": "Snittet av de tre verste timene (på tre ulike dager) for hver måned. Røde streker er grensene der nettleia blir dyrere. Ser dere at mange måneder ligger tett under en strek, er det mye å spare på å spre forbruket litt bedre.",
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
+      "targets": [{"refId": "A", "format": "time_series", "rawQuery": true, "editorMode": "code", "rawSql": "with m as (\n  select month, top3_avg_kwh from power.monthly_capacity_cost\n  where $__timeFilter(month at time zone 'Europe/Oslo')\n), steps as (\n  select min_kwh, monthly_nok from power.capacity_step\n  where valid_from = (select max(valid_from) from power.capacity_step) and min_kwh > 4 and min_kwh < 16\n)\nselect month at time zone 'Europe/Oslo' as time, 'Snitt av de 3 verste timene' as metric, top3_avg_kwh as value from m\nunion all\nselect month at time zone 'Europe/Oslo', 'Grense ' || round(min_kwh)::int || ' kWh → ' || round(monthly_nok)::int || ' kr/mnd', round(min_kwh)\nfrom m cross join steps\norder by 1"}],
+      "fieldConfig": {"defaults": {"unit": "kwatth", "decimals": 1, "min": 0, "softMax": 12,
+          "custom": {"drawStyle": "bars", "fillOpacity": 85, "lineWidth": 1}},
+        "overrides": [
+          {"matcher": {"id": "byName", "options": "Snitt av de 3 verste timene"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "dark-blue"}}]},
+          {"matcher": {"id": "byRegexp", "options": "^Grense.*"}, "properties": [
+            {"id": "custom.drawStyle", "value": "line"}, {"id": "custom.lineWidth", "value": 2}, {"id": "custom.fillOpacity", "value": 0},
+            {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]}
+        ]},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    },
+    {
+      "type": "xychart", "title": "Forbruk mot utetemperatur (hver prikk er ett døgn)", "gridPos": {"x": 0, "y": 44, "w": 12, "h": 10},
+      "description": "Jo kaldere det er ute (til venstre), jo mer strøm bruker huset. Prikkene ligger nesten på en linje, og det er oppvarmingen. Prikker høyt over resten er dager med mye annet, som billading. Blir prikkene lavere fra år til år ved samme temperatur, har huset blitt mer effektivt.",
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
+      "targets": [{"refId": "A", "format": "table", "rawQuery": true, "editorMode": "code", "rawSql": "select avg(temperature_c) as \"Utetemperatur (°C)\", sum(kwh) as \"Forbruk per døgn (kWh)\"\nfrom power.hourly_priced\nwhere $__timeFilter(ts) and temperature_c is not null\ngroup by (ts at time zone 'Europe/Oslo')::date\nhaving count(*) >= 23"}],
+      "fieldConfig": {"defaults": {"unit": "kwatth", "decimals": 0, "custom": {"show": "points", "pointSize": {"fixed": 4}, "fillOpacity": 50}},
+        "overrides": [{"matcher": {"id": "byName", "options": "Utetemperatur (°C)"}, "properties": [{"id": "unit", "value": "celsius"}]}]},
+      "options": {"mapping": "auto", "series": [{}], "legend": {"showLegend": false}, "tooltip": {"mode": "single"}}
+    },
+    {
+      "type": "timeseries", "title": "Grunnlast – det som alltid står på", "gridPos": {"x": 12, "y": 44, "w": 12, "h": 10},
+      "description": "Det laveste forbruket i løpet av døgnet (som regel om natta), snitt per måned. Det er det som alltid går: kjøleskap, frys, ruter, varmtvannsbereder, ventilasjon og standby. Om sommeren viser det hva huset bruker uten oppvarming. Stiger grunnlasten uten grunn, kan noe stå på som ikke burde.",
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
+      "targets": [{"refId": "A", "format": "time_series", "rawQuery": true, "editorMode": "code", "rawSql": "select date_trunc('month', day) at time zone 'Europe/Oslo' as time, avg(base) as \"Grunnlast\"\nfrom (\n  select (ts at time zone 'Europe/Oslo')::date as day, min(kwh) as base\n  from power.consumption_hourly\n  where kwh is not null and $__timeFilter(ts)\n  group by 1\n) d\ngroup by 1 order by 1"}],
+      "fieldConfig": {"defaults": {"unit": "kwatt", "decimals": 2, "min": 0, "custom": {"lineWidth": 2, "fillOpacity": 15, "lineInterpolation": "smooth"}}},
+      "options": {"legend": {"showLegend": false}, "tooltip": {"mode": "single"}}
+    },
+    {
+      "type": "timeseries", "title": "Strømpris over tid (snitt per måned)", "gridPos": {"x": 0, "y": 54, "w": 24, "h": 9},
+      "description": "Gjennomsnittlig spotpris per måned (inkl. mva., uten nettleie) sammenlignet med Norgespris (50 øre). Priskrisen i 2022 er godt synlig. Oransje streker viser når strømstøtte og Norgespris kom.",
+      "datasource": {"type": "grafana-postgresql-datasource", "uid": "power-postgres"},
+      "targets": [{"refId": "A", "format": "time_series", "rawQuery": true, "editorMode": "code", "rawSql": "select date_trunc('month', ts at time zone 'Europe/Oslo') at time zone 'Europe/Oslo' as time,\n       avg(total) as \"Spotpris\",\n       0.50 as \"Norgespris\"\nfrom power.spot_price\nwhere source = 'tibber' and resolution_min = 60 and $__timeFilter(ts)\ngroup by 1 order by 1"}],
+      "fieldConfig": {"defaults": {"unit": "suffix: kr/kWh", "decimals": 2, "min": 0, "custom": {"lineWidth": 2, "fillOpacity": 10, "lineInterpolation": "stepAfter"}},
+        "overrides": [{"matcher": {"id": "byName", "options": "Norgespris"}, "properties": [
+          {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}, {"id": "custom.fillOpacity", "value": 0},
+          {"id": "custom.lineStyle", "value": {"fill": "dash", "dash": [8, 6]}}]}]},
+      "options": {"legend": {"displayMode": "list", "placement": "bottom"}, "tooltip": {"mode": "multi"}}
+    }
+  ]
+}
