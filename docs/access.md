@@ -12,7 +12,7 @@ No values are in this repo.
 | ENTSO-E | Owner's private e-mail | API access requested by e-mail |
 | Fly.io | Owner, personal org | Card on file |
 | Grafana Cloud | Stack `emilarnesen`, region EU Sweden | |
-| Supabase | Owner | Region eu-west-1 (Ireland). Connect through the session pooler (IPv4); pooler user names are `<role>.<project-ref>` |
+| Supabase | Owner | Region eu-north-1 (Stockholm), next to Fly and Grafana Cloud. Connect through the session pooler (IPv4); pooler user names are `<role>.<project-ref>` |
 | GitHub | `emilarnesen` | Public repo |
 
 ## Credentials
@@ -23,7 +23,7 @@ No values are in this repo.
 | Elvia API key | Grid Tariff | collector | Fly secret `ELVIA_API_KEY` |
 | ENTSO-E token | Read | backfill | Fly secret `ENTSOE_TOKEN` |
 | Grafana access policy token `fly-power-collector` | `metrics:write` only | collector | Fly secret `GRAFANA_METRICS_TOKEN` |
-| Grafana service account `claude-dashboards` | Editor | Dashboard and alert sync | Owner's machine only |
+| Grafana service account `claude-dashboards` | Admin (Editor cannot create datasources or folders) | Datasource, dashboard and alert sync | Owner's machine only |
 | Postgres role `power_writer` | Insert/update in schema `power` | collector | Fly secret `DATABASE_URL` |
 | Postgres role `power_reader` | Select in schema `power` | Grafana datasource | Grafana datasource config |
 | Postgres `postgres` (owner) | Everything | Migrations only | Owner's machine only |
